@@ -50,6 +50,10 @@ class SleepTrackerViewModel(
     val navigateToSleepQuality : LiveData<SleepNight>
     get() = _navigateToSleepQuality
 
+    private val _navigateToSleepDataQuality = MutableLiveData<Long>()
+    val navigateToSleepDataQuality
+        get() = _navigateToSleepDataQuality
+
     var startButtonVisible = Transformations.map(tonight) {
         null == it
     }
@@ -135,6 +139,14 @@ class SleepTrackerViewModel(
         withContext(Dispatchers.IO) {
             database.clear()
         }
+    }
+
+    fun onSleepNightClicked(id: Long){
+        _navigateToSleepDataQuality.value = id
+    }
+
+    fun onSleepDataQualityNavigated() {
+        _navigateToSleepDataQuality.value = null
     }
 }
 
