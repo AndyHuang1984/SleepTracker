@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.database.SleepDatabase
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
@@ -44,6 +45,7 @@ class SleepTrackerFragment : Fragment() {
     private lateinit var viewModelFactory: SleepTrackerViewModelFactory
     private lateinit var application: Application
     private lateinit var sleepDatabaseDao: SleepDatabaseDao
+    private lateinit var adapter: SleepNightAdapter
 
     /**
      * Called when the Fragment is ready to display content to the screen.
@@ -70,6 +72,10 @@ class SleepTrackerFragment : Fragment() {
     }
 
     fun initView() {
+
+        adapter = SleepNightAdapter()
+        binding.sleepList.adapter = adapter
+
         viewModel.navigateToSleepQuality.observe(viewLifecycleOwner, Observer { night ->
             night?.let {
                 this.findNavController().navigate(
@@ -86,6 +92,18 @@ class SleepTrackerFragment : Fragment() {
                         Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
                 viewModel.downShowingSnackbar()
+            }
+        })
+        viewModel.nights.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                adapter.submitList(it)
+            }
+        })
+
+        // 新增資料不會自動滾動到最上層問題修復
+        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                binding.sleepList.scrollToPosition(0)
             }
         })
     }
